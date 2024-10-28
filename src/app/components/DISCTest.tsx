@@ -264,7 +264,7 @@ const questions = [
 
 const DISCTest = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState([]);
+  const [answers, setAnswers] = useState<{ questionId: number; mostLike: { text: string; type: 'D' | 'I' | 'S' | 'C' } | null; leastLike: { text: string; type: 'D' | 'I' | 'S' | 'C' } | null }[]>([]);
   const [mostLike, setMostLike] = useState('');
   const [leastLike, setLeastLike] = useState('');
   const [showResults, setShowResults] = useState(false);
@@ -279,14 +279,16 @@ const DISCTest = () => {
         mostScores[answer.mostLike.type]++;
       }
       if (answer.leastLike) {
-        leastScores[answer.leastLike.type]++;
+        if (answer.leastLike) {
+          leastScores[answer.leastLike.type]++;
+        }
       }
     });
     
     // Calculate final scores (Most - Least)
-    const finalScores = {};
+    const finalScores: { D: number; I: number; S: number; C: number } = { D: 0, I: 0, S: 0, C: 0 };
     Object.keys(scoreTemplate).forEach(key => {
-      finalScores[key] = mostScores[key] - leastScores[key];
+      finalScores[key as 'D' | 'I' | 'S' | 'C'] = mostScores[key as 'D' | 'I' | 'S' | 'C'] - leastScores[key as 'D' | 'I' | 'S' | 'C'];
     });
     
     return finalScores;
@@ -294,10 +296,13 @@ const DISCTest = () => {
   
   const handleNext = () => {
     if (mostLike && leastLike) {
+      const mostLikeTrait = questions[currentQuestion].traits.find(t => t.text === mostLike) as { text: string; type: 'D' | 'I' | 'S' | 'C' } | null;
+      const leastLikeTrait = questions[currentQuestion].traits.find(t => t.text === leastLike) as { text: string; type: 'D' | 'I' | 'S' | 'C' } | null;
+      
       const answer = {
         questionId: questions[currentQuestion].id,
-        mostLike: questions[currentQuestion].traits.find(t => t.text === mostLike),
-        leastLike: questions[currentQuestion].traits.find(t => t.text === leastLike)
+        mostLike: mostLikeTrait,
+        leastLike: leastLikeTrait
       };
       
       setAnswers([...answers, answer]);
@@ -312,8 +317,13 @@ const DISCTest = () => {
     }
   };
   
-  const getPersonalityAnalysis = (scores) => {
-    let analysis = {
+  const getPersonalityAnalysis = (scores: { [key: string]: number }) => {
+    let analysis: {
+      dominant: string[],
+      secondary: string[],
+      challenges: string[],
+      suitableRoles: string[]
+    } = {
       dominant: [],
       secondary: [],
       challenges: [],
