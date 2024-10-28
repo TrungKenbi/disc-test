@@ -318,7 +318,7 @@ const DISCTest = () => {
   };
   
   const getPersonalityAnalysis = (scores: { [key: string]: number }) => {
-    let analysis: {
+    const analysis: {
       dominant: string[],
       secondary: string[],
       challenges: string[],
