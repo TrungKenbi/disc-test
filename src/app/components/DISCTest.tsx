@@ -434,6 +434,53 @@ const DISCTest = () => {
     const results = calculateResults();
     const analysis = getPersonalityAnalysis(results);
     
+    // Calculate total and percentages
+    const total = Math.abs(results.D) + Math.abs(results.I) + Math.abs(results.S) + Math.abs(results.C);
+    const getPercentage = (value) => Math.round(Math.abs(value) / total * 100);
+    
+    const percentages = {
+      D: getPercentage(results.D),
+      I: getPercentage(results.I),
+      S: getPercentage(results.S),
+      C: getPercentage(results.C)
+    };
+
+    // Calculate SVG paths for pie chart
+    const getSlicePath = (startAngle, endAngle) => {
+      const start = polarToCartesian(200, 200, 150, endAngle);
+      const end = polarToCartesian(200, 200, 150, startAngle);
+      const largeArcFlag = endAngle - startAngle <= 180 ? 0 : 1;
+      return [
+        'M', 200, 200,
+        'L', start.x, start.y,
+        'A', 150, 150, 0, largeArcFlag, 0, end.x, end.y,
+        'Z'
+      ].join(' ');
+    };
+
+    const polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
+      const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+      return {
+        x: centerX + (radius * Math.cos(angleInRadians)),
+        y: centerY + (radius * Math.sin(angleInRadians))
+      };
+    };
+
+    // Calculate angles for each slice
+    let currentAngle = 0;
+    const slices = [
+      { type: 'D', color: '#ff6b6b', name: 'Red' },  // Red for D
+      { type: 'I', color: '#4dabf7', name: 'Blue' }, // Blue for I 
+      { type: 'S', color: '#69db7c', name: 'Green' }, // Green for S
+      { type: 'C', color: '#ffd43b', name: 'Yellow' }  // Yellow for C
+    ].map(slice => {
+      const angle = (percentages[slice.type] / 100) * 360;
+      const pathData = getSlicePath(currentAngle, currentAngle + angle);
+      const labelPos = polarToCartesian(200, 200, 100, currentAngle + (angle / 2));
+      currentAngle += angle;
+      return { ...slice, pathData, labelPos, percentage: percentages[slice.type] };
+    });
+    
     return (
       <Card className="w-full max-w-4xl mx-auto">
         <CardHeader>
@@ -441,22 +488,42 @@ const DISCTest = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-8">
-            {/* Graph */}
-            <div className="space-y-4">
-              {Object.entries(results).map(([type, score]) => (
-                <div key={type} className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label className="text-lg font-medium">{type}</Label>
-                    <span className="font-bold">{score}</span>
-                  </div>
-                  <div className="relative">
-                    <Progress 
-                      value={(score + 28) * 1.785} 
-                      className="h-4"
+            {/* Pie Chart */}
+            <div className="flex justify-center mb-8">
+              <svg width="400" height="400" viewBox="0 0 400 400">
+                {/* Pie Slices */}
+                {slices.map((slice, i) => (
+                  <g key={slice.type}>
+                    <path
+                      d={slice.pathData}
+                      fill={slice.color}
+                      stroke="white"
+                      strokeWidth="2"
                     />
-                  </div>
-                </div>
-              ))}
+                    {/* Labels */}
+                    <text
+                      x={slice.labelPos.x}
+                      y={slice.labelPos.y}
+                      textAnchor="middle"
+                      dy=".35em"
+                      className="text-sm font-medium"
+                      fill="black"
+                    >
+                      {slice.name}
+                    </text>
+                    <text
+                      x={slice.labelPos.x}
+                      y={slice.labelPos.y + 20}
+                      textAnchor="middle"
+                      dy=".35em"
+                      className="text-sm"
+                      fill="black"
+                    >
+                      {slice.percentage}%
+                    </text>
+                  </g>
+                ))}
+              </svg>
             </div>
 
             {/* Analysis */}
