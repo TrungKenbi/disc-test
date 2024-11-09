@@ -470,9 +470,9 @@ const DISCTest = () => {
     let currentAngle = 0;
     const slices = [
       { type: 'D', color: '#ff6b6b', name: 'Red' },  // Red for D
-      { type: 'I', color: '#4dabf7', name: 'Blue' }, // Blue for I 
+      { type: 'I', color: '#ffd43b', name: 'Yellow' }, // Yellow for I 
       { type: 'S', color: '#69db7c', name: 'Green' }, // Green for S
-      { type: 'C', color: '#ffd43b', name: 'Yellow' }  // Yellow for C
+      { type: 'C', color: '#4dabf7', name: 'Blue' }  // Blue for C
     ].map(slice => {
       const angle = (percentages[slice.type] / 100) * 360;
       const pathData = getSlicePath(currentAngle, currentAngle + angle);
