@@ -436,7 +436,7 @@ const DISCTest = () => {
     
     // Calculate total and percentages
     const total = Math.abs(results.D) + Math.abs(results.I) + Math.abs(results.S) + Math.abs(results.C);
-    const getPercentage = (value) => Math.round(Math.abs(value) / total * 100);
+    const getPercentage = (value: number) => Math.round(Math.abs(value) / total * 100);
     
     const percentages = {
       D: getPercentage(results.D),
@@ -446,7 +446,7 @@ const DISCTest = () => {
     };
 
     // Calculate SVG paths for pie chart
-    const getSlicePath = (startAngle, endAngle) => {
+    const getSlicePath = (startAngle: number, endAngle: number) => {
       const start = polarToCartesian(200, 200, 150, endAngle);
       const end = polarToCartesian(200, 200, 150, startAngle);
       const largeArcFlag = endAngle - startAngle <= 180 ? 0 : 1;
@@ -458,7 +458,7 @@ const DISCTest = () => {
       ].join(' ');
     };
 
-    const polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
+    const polarToCartesian = (centerX: number, centerY: number, radius: number, angleInDegrees: number) => {
       const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
       return {
         x: centerX + (radius * Math.cos(angleInRadians)),
@@ -474,11 +474,11 @@ const DISCTest = () => {
       { type: 'S', color: '#69db7c', name: 'Green' }, // Green for S
       { type: 'C', color: '#4dabf7', name: 'Blue' }  // Blue for C
     ].map(slice => {
-      const angle = (percentages[slice.type] / 100) * 360;
+      const angle = (percentages[slice.type as 'D' | 'I' | 'S' | 'C'] / 100) * 360;
       const pathData = getSlicePath(currentAngle, currentAngle + angle);
       const labelPos = polarToCartesian(200, 200, 100, currentAngle + (angle / 2));
       currentAngle += angle;
-      return { ...slice, pathData, labelPos, percentage: percentages[slice.type] };
+      return { ...slice, pathData, labelPos, percentage: percentages[slice.type as 'D' | 'I' | 'S' | 'C'] };
     });
     
     return (
